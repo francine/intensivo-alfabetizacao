@@ -1,37 +1,48 @@
-/* Quebra-Cabeça Deslizante — monta a figura em ordem (percepção / orientação espacial / planejamento) */
+/* Quebra-Cabeça Deslizante — monta a ordem certa (percepção / orientação espacial / planejamento)
+   Framework de fases: cada fase muda o tamanho da grade via params.grid. */
 (function () {
   const { register, h, sfx } = window.SINAPSE;
-
-  // dificuldade por faixa etária
-  const LEVELS = {
-    "5-10":  { n: 3, nome: "Fácil" },
-    "11-17": { n: 4, nome: "Médio" },
-    "18+":   { n: 5, nome: "Difícil" },
-  };
 
   register({
     id: "quebra",
     title: "Quebra-Cabeça",
     emoji: "🧩",
-    tagline: "Deslize as peças e monte a ordem certa. Fácil, médio ou difícil por idade.",
+    tagline: "Deslize as peças e monte a ordem certa. Passe de fase e ganhe estrelas!",
     color: "#f0563f",
     ages: ["5-10", "11-17", "18+"],
     pillars: ["percepcao", "executiva"],
-    start(stage, api) {
-      const lvl = LEVELS[api.age] || LEVELS["11-17"];
-      const N = lvl.n, TOTAL = N * N;
-      let board, blank, moves, t0, tick;
 
-      api.intro("🧩", `Quebra-Cabeça · ${lvl.nome} (${N}×${N})`,
-        `Toque numa peça vizinha do espaço vazio para deslizá-la. Coloque os números em ordem (1, 2, 3…) com o espaço vazio no canto. Nível ${lvl.nome.toLowerCase()} para a sua faixa!`,
-        run);
+    help: {
+      como: [
+        "👆 Toque numa peça vizinha do buraco pra ela deslizar pro lugar vazio.",
+        "🔢 Vá colocando os números em ordem: 1, 2, 3, 4…",
+        "🕳️ O espaço vazio precisa terminar no cantinho de baixo.",
+        "🎉 Montou tudo em ordem? Você passa de fase e ganha estrelas!",
+      ],
+      dica: "Resolva primeiro a linha de cima inteira, depois desça linha por linha.",
+    },
+
+    phases: [
+      { nome: "Fácil · 3×3", params: { grid: 3 } },
+      { nome: "Médio · 4×4", params: { grid: 4 } },
+      { nome: "Difícil · 5×5", params: { grid: 5 } },
+    ],
+
+    start(stage, api) {
+      const N = (api.phase && api.phase.params && api.phase.params.grid) || 3;
+      const TOTAL = N * N;
+      const GAP = 2.6; // % do tabuleiro entre peças
+      const CELL = (100 - GAP * (N - 1)) / N;
+      const NOME = api.phase.nome || `${N}×${N}`;
+      let board, blank, moves, t0, tick, boardEl, tileEls;
+
+      run();
 
       function solvedBoard() { return Array.from({ length: TOTAL }, (_, i) => (i + 1) % TOTAL); } // [1..N²-1, 0]
 
       function run() {
         board = solvedBoard();
         blank = TOTAL - 1;
-        // embaralha por movimentos válidos (garante solúvel)
         let prev = -1;
         for (let k = 0; k < TOTAL * 40; k++) {
           const nb = neighbors(blank).filter((x) => x !== prev);
@@ -39,10 +50,11 @@
           prev = blank;
           swap(pick, blank); blank = pick;
         }
+        if (isSolved()) return run(); // garante que começa embaralhado
         moves = 0; t0 = Date.now();
         clearInterval(tick);
         tick = setInterval(() => api.setStats({ Jogadas: moves, Tempo: ((Date.now() - t0) / 1000).toFixed(0) + "s" }), 250);
-        draw();
+        buildBoard();
       }
 
       function neighbors(i) {
@@ -55,56 +67,87 @@
       }
       function swap(a, b) { const t = board[a]; board[a] = board[b]; board[b] = t; }
       function isSolved() { return board.every((v, i) => v === (i + 1) % TOTAL); }
+      function posOf(i) { return { left: (i % N) * (CELL + GAP), top: Math.floor(i / N) * (CELL + GAP) }; }
 
-      function draw() {
-        api.setStats({ Jogadas: moves, Tempo: ((Date.now() - t0) / 1000).toFixed(0) + "s" });
-        const size = Math.min(420, 88 * N);
-        const grid = h.el("div", {
-          style: { display: "grid", gridTemplateColumns: `repeat(${N},1fr)`, gap: "8px", width: size + "px", maxWidth: "100%", margin: "6px auto 0", aspectRatio: "1/1" },
+      function buildBoard() {
+        api.setStats({ Jogadas: moves, Tempo: "0s" });
+        const size = Math.min(420, 92 * N);
+        boardEl = h.el("div", {
+          style: { position: "relative", width: size + "px", maxWidth: "100%", margin: "6px auto 0", aspectRatio: "1/1", background: "#eef3fb", borderRadius: "16px", padding: "0", boxShadow: "inset 0 0 0 1px var(--line)" },
         });
-        board.forEach((val, i) => {
-          if (val === 0) { grid.appendChild(h.el("div", { style: { borderRadius: "12px", background: "transparent" } })); return; }
-          const canMove = neighbors(blank).includes(i);
-          // matiz pela posição-alvo → quando resolvido vira um gradiente suave (auto-dica)
+        tileEls = {};
+        for (let val = 1; val < TOTAL; val++) {
           const hue = Math.round((val / TOTAL) * 210) + 195;
           const tile = h.el("button", {
+            "aria-label": "peça " + val,
             style: {
-              borderRadius: "12px", border: "0", cursor: canMove ? "pointer" : "default",
+              position: "absolute", width: CELL + "%", height: CELL + "%",
+              borderRadius: "12px", border: "0", cursor: "pointer",
               display: "grid", placeItems: "center",
               fontFamily: "var(--font-display)", fontWeight: 700,
               fontSize: N >= 5 ? "1.2rem" : "1.7rem", color: "#fff",
               background: `linear-gradient(150deg, hsl(${hue} 78% 62%), hsl(${hue} 72% 46%))`,
               boxShadow: "0 4px 10px rgba(15,61,128,.18), inset 0 0 0 1px rgba(255,255,255,.25)",
-              transition: "transform .12s, filter .12s",
-              filter: canMove ? "none" : "saturate(.9)",
+              transition: "left .18s cubic-bezier(.2,.8,.3,1), top .18s cubic-bezier(.2,.8,.3,1), transform .12s, filter .12s",
             },
             text: String(val),
-            onclick: () => move(i),
+            onclick: () => move(board.indexOf(val)),
           });
-          grid.appendChild(tile);
-        });
-
+          tileEls[val] = tile;
+          boardEl.appendChild(tile);
+        }
+        placeAll();
         stage.innerHTML = "";
         stage.appendChild(h.el("div", { class: "g-panel" }, [
-          h.el("div", { class: "g-prompt", style: { color: "var(--ink-soft)", textAlign: "center", marginBottom: "4px" }, text: `Nível ${lvl.nome} · ordene 1 → ${TOTAL - 1}` }),
-          grid,
-          h.el("div", { class: "g-toolbar" }, [h.el("button", { class: "btn btn-ghost btn-sm", text: "🔀 Embaralhar", onclick: run })]),
+          h.el("div", { class: "g-prompt", style: { color: "var(--ink-soft)", textAlign: "center", marginBottom: "4px" }, text: `${NOME} · ordene 1 → ${TOTAL - 1}` }),
+          boardEl,
+          h.el("div", { class: "g-toolbar" }, [
+            h.el("button", { class: "btn btn-ghost btn-sm", text: "🔀 Embaralhar", onclick: run }),
+            h.el("button", { class: "btn btn-ghost btn-sm", text: "🗺️ Mapa de fases", onclick: () => api.showMap() }),
+          ]),
         ]));
+      }
+
+      function placeAll() {
+        board.forEach((val, i) => {
+          if (val === 0) return;
+          const t = tileEls[val], p = posOf(i);
+          t.style.left = p.left + "%"; t.style.top = p.top + "%";
+          const canMove = neighbors(blank).includes(i);
+          t.style.cursor = canMove ? "pointer" : "default";
+          t.style.filter = canMove ? "none" : "saturate(.9)";
+        });
       }
 
       function move(i) {
         if (!neighbors(blank).includes(i)) return;
+        const val = board[i];
         swap(i, blank); blank = i; moves++;
-        sfx.click; beep(480 + (board[i] || 0) * 6);
+        sfx.click(); beep(480 + (val || 0) * 6);
+        placeAll();
+        api.setStats({ Jogadas: moves, Tempo: ((Date.now() - t0) / 1000).toFixed(0) + "s" });
         if (isSolved()) {
           clearInterval(tick);
           sfx.good();
+          // celebração: peças pulsam em cascata
+          Object.keys(tileEls).forEach((v, k) => {
+            const t = tileEls[v];
+            setTimeout(() => { t.classList.remove("g-boom"); void t.offsetWidth; t.classList.add("g-boom"); }, k * 40);
+          });
           const secs = (Date.now() - t0) / 1000;
-          const par = TOTAL * 8; // jogadas de referência
-          const score = Math.round(Math.max(20, 100 - Math.max(0, moves - par) * (40 / par) - Math.max(0, secs - TOTAL * 6) * 0.5));
-          return setTimeout(() => api.finish({ score, max: 100, scoreText: `${moves} jogadas · ${secs.toFixed(0)}s`, note: `Você montou o quebra-cabeça ${lvl.nome.toLowerCase()} (${N}×${N})! 🧩` }), 350);
+          // ---- estrelas por eficiência (menos jogadas / menos tempo) ----
+          const parMoves = TOTAL * 5;      // jogadas "ideais" de referência
+          const parSecs = TOTAL * 4;       // tempo "ideal" de referência
+          let stars = 1;                   // completar sempre garante ≥ 1 estrela
+          if (moves <= parMoves * 1.2 && secs <= parSecs * 1.6) stars = 3;
+          else if (moves <= parMoves * 2.2 && secs <= parSecs * 2.8) stars = 2;
+          const score = Math.round(Math.max(20, 100 - Math.max(0, moves - parMoves) * (40 / parMoves) - Math.max(0, secs - parSecs) * 0.5));
+          return setTimeout(() => api.finish({
+            score, max: 100, stars,
+            scoreText: `${moves} jogadas · ${secs.toFixed(0)}s`,
+            note: `Você montou o quebra-cabeça ${NOME}! 🧩`,
+          }), 700);
         }
-        draw();
       }
     },
   });

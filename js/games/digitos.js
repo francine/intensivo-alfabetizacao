@@ -33,7 +33,7 @@
         ]));
         let i = 0;
         const iv = setInterval(() => {
-          display.textContent = seq[i]; sfx.tick;
+          display.textContent = seq[i]; sfx.tick();
           beep(440 + seq[i] * 40);
           setTimeout(() => (display.textContent = ""), flashMs * 0.6);
           i++;

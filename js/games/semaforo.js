@@ -54,8 +54,8 @@
           waiting = false;
           zone.style.background = "#eef3fb"; zone.textContent = "👀";
           if (!answered) {
-            if (!isGo) { correct++; sfx.tick; flash(true, "Segurou! 👍"); } // correct withhold
-            else { sfx.bad(); flash(false, "Rápido demais! passou o verde"); } // miss
+            if (!isGo) { correct++; sfx.tick(); flash(true, "Segurou! 👍"); } // correct withhold
+            else { sfx.bad(); flash(false, "Ops, passou o verde! Toque mais rápido 💚"); } // miss
           }
           api.setStats({ Acertos: correct, Rodada: `${t}/${trials}` });
           setTimeout(nextTrial, 500);

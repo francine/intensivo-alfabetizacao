@@ -56,7 +56,7 @@
           const slot = slotEls[filled];
           slot.textContent = ch; slot.style.borderStyle = "solid"; slot.style.borderColor = api.color; slot.style.color = "#0b2246";
           placed.push({ ch, tile, slot }); filled++;
-          sfx.click; beep(520);
+          sfx.click(); beep(520);
           if (filled === word.length) check();
         }
         function undo() {

@@ -12,7 +12,35 @@
     pillars: ["matematica", "atencao"],
     start(stage, api) {
       const total = 10;
-      let q = 0, correct = 0, tLeft, tick;
+      let q = 0, correct = 0, tLeft, tick, rocketEl;
+
+      // cena do foguete: sobe conforme os acertos
+      function rocketScene() {
+        const track = h.el("div", {
+          style: {
+            position: "relative", width: "72px", height: "132px", margin: "0 auto 6px", borderRadius: "16px",
+            background: "linear-gradient(180deg,#0f3d80 0%,#2b6fe0 55%,#bfe0ff 100%)",
+            overflow: "hidden", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.15)",
+          },
+        }, [
+          h.el("div", { style: { position: "absolute", top: "12px", left: "14px", fontSize: ".7rem" }, text: "✨" }),
+          h.el("div", { style: { position: "absolute", top: "30px", right: "12px", fontSize: ".55rem" }, text: "⭐" }),
+          h.el("div", { style: { position: "absolute", top: "58px", left: "20px", fontSize: ".5rem" }, text: "✨" }),
+        ]);
+        const ground = h.el("div", { style: { position: "absolute", bottom: "0", left: "0", right: "0", height: "16px", background: "linear-gradient(180deg,#8fce9f,#4fae6e)" } });
+        rocketEl = h.el("div", {
+          class: "contas-rocket",
+          style: {
+            position: "absolute", left: "50%", transform: "translateX(-50%)", fontSize: "1.9rem", lineHeight: 1,
+            bottom: rocketBottom() + "%", transition: "bottom .6s cubic-bezier(.2,.9,.3,1.3)",
+          },
+          text: "🚀",
+        });
+        track.appendChild(ground);
+        track.appendChild(rocketEl);
+        return track;
+      }
+      function rocketBottom() { return 8 + (correct / total) * 74; }
 
       api.intro("🔢", "Foguete das Contas",
         api.age === "5-10"
@@ -68,6 +96,7 @@
 
         stage.innerHTML = "";
         const nodes = [
+          rocketScene(),
           h.el("div", { class: "g-prompt", style: { color: "var(--ink-soft)" }, text: "Quanto é?" }),
           h.el("div", { style: { fontSize: "3rem", fontFamily: "var(--font-display)", fontWeight: 700, margin: "6px 0" }, text: text + " = ?" }),
         ];
@@ -93,7 +122,10 @@
         clearInterval(tick);
         const fb = stage.querySelector(".g-feedback");
         [...grid.children].forEach((b) => { b.disabled = true; if (Number(b.textContent) === ans) { b.style.borderColor = "#37c26f"; b.style.background = "#e8fff0"; } });
-        if (ok) { correct++; sfx.good(); fb.textContent = "Certo! ✅"; fb.className = "g-feedback ok"; }
+        if (ok) {
+          correct++; sfx.good(); fb.textContent = "Certo! 🚀"; fb.className = "g-feedback ok";
+          if (rocketEl) { rocketEl.style.bottom = rocketBottom() + "%"; rocketEl.classList.remove("g-boom"); void rocketEl.offsetWidth; rocketEl.classList.add("g-boom"); }
+        }
         else { sfx.bad(); if (btn) { btn.style.borderColor = "#e8567f"; btn.style.background = "#fff0f4"; } fb.textContent = timeout ? "Tempo! ⏱️ era " + ans : "A resposta era " + ans; fb.className = "g-feedback no"; }
         api.setStats({ Certas: correct, Questão: `${q}/${total}` });
         setTimeout(next, 950);

@@ -60,7 +60,8 @@
         api.setStats({ Acertos: correct, Rodada: `${round}/${total}` });
 
         const big = h.el("div", {
-          style: { fontSize: "5rem", fontFamily: "var(--font-display)", fontWeight: 700, color: api.color, textTransform: "uppercase", lineHeight: 1 },
+          class: "fonemas-letter",
+          style: { display: "inline-block", fontSize: "5rem", fontFamily: "var(--font-display)", fontWeight: 700, color: api.color, textTransform: "uppercase", lineHeight: 1 },
           text: letter,
         });
         const listen = h.el("button", { class: "btn btn-ghost btn-sm", text: "🔊 Ouvir a letra", onclick: () => speak(letter) });
@@ -75,11 +76,14 @@
               if (word[0] === letter) {
                 fb.dataset.done = "1"; correct++; sfx.good();
                 b.style.borderColor = "#37c26f"; b.style.background = "#e8fff0";
+                b.classList.add("g-boom");
+                big.classList.remove("fonemas-letter"); void big.offsetWidth; big.classList.add("g-celebrate");
                 fb.textContent = `Isso! ${word.toUpperCase()} começa com ${letter.toUpperCase()}`; fb.className = "g-feedback ok";
                 speak(word);
                 setTimeout(next, 1100);
               } else {
                 sfx.bad(); b.style.borderColor = "#e8567f"; b.style.background = "#fff0f4";
+                b.classList.remove("g-wrong"); void b.offsetWidth; b.classList.add("g-wrong");
                 fb.textContent = "Esse não… escute de novo o som"; fb.className = "g-feedback no";
               }
             },

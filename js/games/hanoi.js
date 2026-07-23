@@ -65,7 +65,7 @@
       function clickPeg(pi) {
         if (sel === null) {
           if (!pegs[pi].length) return;
-          sel = pi; sfx.click; beep(500); draw(); return;
+          sel = pi; sfx.click(); beep(500); draw(); return;
         }
         if (sel === pi) { sel = null; draw(); return; }
         const from = pegs[sel], to = pegs[pi];

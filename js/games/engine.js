@@ -70,6 +70,26 @@
   };
   SINAPSE.list = function () { return SINAPSE.order.map((id) => SINAPSE.games[id]); };
 
+  /* ---------- progresso (mapa de fases + estrelas) ---------- */
+  const PKEY = "sinapse_progress";
+  function loadProgress() { try { return JSON.parse(localStorage.getItem(PKEY)) || {}; } catch (e) { return {}; } }
+  function saveProgress(p) { try { localStorage.setItem(PKEY, JSON.stringify(p)); } catch (e) {} }
+  function gameStars(id) { return loadProgress()[id] || {}; } // { phaseIndex: stars }
+  function bestStars(id, idx) { return gameStars(id)[idx] || 0; }
+  function recordStars(id, idx, stars) {
+    const p = loadProgress();
+    p[id] = p[id] || {};
+    if (stars > (p[id][idx] || 0)) { p[id][idx] = stars; saveProgress(p); }
+  }
+  function phaseUnlocked(id, idx) { return idx === 0 || bestStars(id, idx - 1) >= 1; }
+  SINAPSE.progress = { load: loadProgress, best: bestStars };
+
+  function starsFromPct(pct) { return pct >= 0.85 ? 3 : pct >= 0.6 ? 2 : pct >= 0.3 ? 1 : 0; }
+  function starRow(n, cls) {
+    return H.el("div", { class: "phase-stars" + (cls ? " " + cls : "") },
+      [0, 1, 2].map((i) => H.el("span", { class: "st" + (i < n ? " on" : " off"), text: "★" })));
+  }
+
   /* ---------- player overlay ---------- */
   let current = null;
 
@@ -87,9 +107,9 @@
             H.el("div", { class: "gg", style: { background: (def.color || "#1f74e0") + "22", color: def.color || "#1f74e0" }, text: def.emoji }),
             H.el("span", { text: def.title }),
           ]),
-          H.el("div", { style: { display: "flex", alignItems: "center", gap: "16px" } }, [
+          H.el("div", { class: "player-actions", style: { display: "flex", alignItems: "center", gap: "16px" } }, [
             statsBox,
-            H.el("button", { class: "btn btn-ghost btn-sm", text: "✕ Sair", onclick: () => SINAPSE.close() }),
+            H.el("button", { class: "btn btn-ghost btn-sm player-exit", text: "✕ Sair", onclick: () => SINAPSE.close() }),
           ]),
         ]),
       ]),
@@ -99,11 +119,16 @@
     root.appendChild(back);
     document.body.style.overflow = "hidden";
 
+    const hasPhases = Array.isArray(def.phases) && def.phases.length > 0;
+
     const api = {
       age,
       color: def.color || "#1f74e0",
       sfx,
       h: H,
+      // fase atual (default retrocompatível pros jogos sem `phases`)
+      phaseIndex: 0,
+      phase: hasPhases ? def.phases[0] : { nome: "", params: {} },
       setStats(obj) {
         statsBox.innerHTML = "";
         for (const label in obj) {
@@ -134,33 +159,146 @@
         );
         if (SINAPSE.autostart) setTimeout(onStart, 60);
       },
+      // navegação de fases
+      startPhase(idx) {
+        if (!hasPhases) return def.start(stage, api);
+        api.phaseIndex = idx;
+        api.phase = def.phases[idx];
+        api.clearStats();
+        stage.innerHTML = "";
+        def.start(stage, api);
+      },
+      repeatPhase() { api.startPhase(api.phaseIndex); },
+      showMap() { renderMap(); },
+
       finish(res) {
-        // res: { score, max, note }
+        // res: { score, max, note, scoreText, stars? }
         const pct = res.max ? res.score / res.max : 0;
-        let medal = "🌟", title = "Muito bem!";
-        if (pct >= 0.9) { medal = "🏆"; title = "Incrível!"; }
-        else if (pct >= 0.7) { medal = "🥇"; title = "Excelente!"; }
-        else if (pct >= 0.4) { medal = "🥈"; title = "Bom trabalho!"; }
-        else { medal = "🌱"; title = "Continue treinando!"; }
-        sfx.win();
+
+        if (!hasPhases) {
+          // ---- modo clássico (jogos ainda sem fases) ----
+          let medal = "🌟", title = "Muito bem!";
+          if (pct >= 0.9) { medal = "🏆"; title = "Incrível!"; }
+          else if (pct >= 0.7) { medal = "🥇"; title = "Excelente!"; }
+          else if (pct >= 0.4) { medal = "🥈"; title = "Bom trabalho!"; }
+          else { medal = "🌱"; title = "Continue treinando!"; }
+          sfx.win();
+          stage.innerHTML = "";
+          stage.appendChild(
+            H.el("div", { class: "g-panel g-result" }, [
+              H.el("div", { class: "medal", text: medal }),
+              H.el("h2", { text: title }),
+              H.el("div", { class: "score", text: res.scoreText || `${res.score}${res.max ? " / " + res.max : ""} pontos` }),
+              res.note ? H.el("p", { text: res.note }) : null,
+              H.el("div", { class: "g-toolbar" }, [
+                H.el("button", { class: "btn btn-primary", text: "↻ Jogar de novo", onclick: () => api.restart() }),
+                H.el("button", { class: "btn btn-ghost", text: "Voltar aos jogos", onclick: () => SINAPSE.close() }),
+              ]),
+            ])
+          );
+          return;
+        }
+
+        // ---- modo mapa de fases ----
+        const idx = api.phaseIndex;
+        const stars = Math.max(0, Math.min(3, res.stars != null ? res.stars : starsFromPct(pct)));
+        const prevBest = bestStars(def.id, idx);
+        const nextExists = !!def.phases[idx + 1];
+        const willUnlockNext = stars >= 1 && nextExists && prevBest < 1;
+        if (stars >= 1) recordStars(def.id, idx, stars);
+
+        let title = "Quase lá!";
+        if (stars >= 3) title = "Perfeito! 🏆";
+        else if (stars === 2) title = "Muito bem! 🌟";
+        else if (stars === 1) title = "Você passou! 🎉";
+        if (stars >= 1) sfx.win(); else sfx.bad();
+
+        const buttons = [];
+        if (stars >= 1 && nextExists) {
+          buttons.push(H.el("button", { class: "btn btn-primary", text: "Próxima fase ▶", onclick: () => api.startPhase(idx + 1) }));
+          buttons.push(H.el("button", { class: "btn btn-ghost", text: "↻ Repetir fase", onclick: () => api.repeatPhase() }));
+        } else {
+          buttons.push(H.el("button", { class: "btn btn-primary", text: "↻ Repetir fase", onclick: () => api.repeatPhase() }));
+        }
+        buttons.push(H.el("button", { class: "btn btn-ghost", text: "🗺️ Mapa de fases", onclick: () => renderMap() }));
+
         stage.innerHTML = "";
         stage.appendChild(
           H.el("div", { class: "g-panel g-result" }, [
-            H.el("div", { class: "medal", text: medal }),
+            H.el("div", { class: "result-phase", text: `${def.emoji} ${def.title} · ${api.phase.nome || "Fase " + (idx + 1)}` }),
+            starRow(stars, "phase-stars-big"),
             H.el("h2", { text: title }),
             H.el("div", { class: "score", text: res.scoreText || `${res.score}${res.max ? " / " + res.max : ""} pontos` }),
             res.note ? H.el("p", { text: res.note }) : null,
-            H.el("div", { class: "g-toolbar" }, [
-              H.el("button", { class: "btn btn-primary", text: "↻ Jogar de novo", onclick: () => api.restart() }),
-              H.el("button", { class: "btn btn-ghost", text: "Voltar aos jogos", onclick: () => SINAPSE.close() }),
-            ]),
+            willUnlockNext ? H.el("div", { class: "unlock-banner", text: `🔓 Nova fase liberada: ${def.phases[idx + 1].nome}!` }) : null,
+            H.el("div", { class: "g-toolbar" }, buttons),
           ])
         );
       },
     };
 
+    /* ---------- mapa de fases + como jogar ---------- */
+    function renderMap() {
+      api.clearStats();
+      stage.innerHTML = "";
+      const help = def.help;
+
+      const helpCard = H.el("div", { class: "phase-help hidden" }, [
+        H.el("div", { class: "phase-help-title", text: "❓ Como jogar" }),
+        H.el("ol", {}, (help && help.como ? help.como : ["Toque numa fase pra começar."]).map((step, i) =>
+          H.el("li", {}, [H.el("span", { class: "s", text: String(i + 1) }), H.el("span", { text: step })]))),
+        help && help.dica ? H.el("div", { class: "dica", html: `💡 <b>Dica:</b> ${escapeText(help.dica)}` }) : null,
+      ]);
+
+      const helpBtn = H.el("button", {
+        class: "btn btn-ghost btn-sm", "aria-expanded": "false",
+        text: "❓ Como jogar",
+        onclick: () => {
+          const open = helpCard.classList.toggle("hidden") === false;
+          helpBtn.setAttribute("aria-expanded", open ? "true" : "false");
+          sfx.click();
+        },
+      });
+
+      const trail = H.el("div", { class: "phase-trail" });
+      def.phases.forEach((ph, i) => {
+        const unlocked = phaseUnlocked(def.id, i);
+        const stars = bestStars(def.id, i);
+        const dot = H.el("button", {
+          class: "phase-dot", disabled: unlocked ? null : "disabled",
+          "aria-label": unlocked ? `Fase ${i + 1}: ${ph.nome}` : `Fase ${i + 1} bloqueada — conclua a anterior`,
+          title: unlocked ? "" : "Conclua a fase anterior para liberar",
+          html: unlocked ? String(i + 1) : "🔒",
+          onclick: unlocked ? () => { sfx.click(); api.startPhase(i); } : null,
+        });
+        const step = H.el("div", { class: "phase-step" + (unlocked ? "" : " locked") + (stars ? " done" : "") }, [
+          dot,
+          H.el("div", { class: "phase-name", text: ph.nome || `Fase ${i + 1}` }),
+          starRow(stars),
+        ]);
+        trail.appendChild(step);
+      });
+
+      stage.appendChild(H.el("div", { class: "g-panel phase-map" }, [
+        H.el("div", { class: "phase-map-head" }, [
+          H.el("h2", { text: "Mapa de fases" }),
+          helpBtn,
+        ]),
+        helpCard,
+        H.el("div", { class: "phase-map-sub", text: "Passe de uma fase para liberar a próxima. Ganhe até ★★★!" }),
+        trail,
+      ]));
+    }
+    function escapeText(s) { return String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
     current = { api, def };
-    def.start(stage, api);
+    if (hasPhases && !SINAPSE.autostart) {
+      renderMap();
+    } else if (hasPhases && SINAPSE.autostart) {
+      api.startPhase(0);
+    } else {
+      def.start(stage, api);
+    }
     document.addEventListener("keydown", escHandler);
   };
 

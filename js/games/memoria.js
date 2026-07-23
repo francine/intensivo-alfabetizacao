@@ -58,8 +58,9 @@
               matched++; flipped = []; lock = false; sfx.good();
               api.setStats({ Pares: `${matched}/${pairs}`, Jogadas: moves });
               if (matched === pairs) {
-                const extra = moves - pairs;
-                const score = Math.max(10, Math.round(100 - extra * (55 / pairs)));
+                const extra = Math.max(0, moves - pairs);
+                // curva gentil: completar todos os pares sempre garante reforço positivo (mín. 🥈)
+                const score = Math.max(45, Math.round(100 - extra * (24 / pairs)));
                 setTimeout(() => api.finish({ score, max: 100, scoreText: `${moves} jogadas · nota ${score}`, note: `Você achou todos os ${pairs} pares!` }), 480);
               }
             }, 360);
