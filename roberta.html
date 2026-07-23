@@ -38,7 +38,22 @@
   .cta-band p { color:#dbe8ff; max-width:46ch; margin:12px auto 26px; }
   .cross { background:#fff; border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; display:flex; gap:22px; align-items:center; box-shadow:var(--sh-sm); flex-wrap:wrap; }
   .cross .em { font-size:2.6rem; }
-  @media (max-width:900px){ .serv, .who-for { grid-template-columns:1fr; } .approach { grid-template-columns:1fr; } .r-photo { max-width:360px; margin:0 auto; order:-1; } }
+  /* Sobre com foto */
+  .about-grid { display:grid; grid-template-columns:.85fr 1.15fr; gap:48px; align-items:center; }
+  .about-photo img { width:100%; border-radius:28px; box-shadow:var(--sh-lg); border:8px solid #fff; display:block; }
+  /* Depoimentos */
+  .tst-grid { columns:3; column-gap:22px; }
+  .tst { background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:26px; box-shadow:var(--sh-sm); margin:0 0 22px; break-inside:avoid; -webkit-column-break-inside:avoid; }
+  .tst .mark { font-family:var(--font-display); font-size:2.4rem; line-height:0; color:var(--blue); opacity:.35; display:block; height:18px; }
+  .tst p { color:var(--ink); font-size:1rem; line-height:1.6; margin:6px 0 18px; }
+  .tst .who { display:flex; align-items:center; gap:12px; }
+  .tst .av { flex:none; width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#2b86f0,#0f3d80); color:#fff; display:grid; place-items:center; font-family:var(--font-display); font-weight:700; }
+  .tst .who b { display:block; font-size:.95rem; }
+  .tst .who span { color:var(--ink-soft); font-size:.82rem; }
+  .tst-note { text-align:center; color:var(--ink-soft); font-size:.82rem; margin-top:8px; }
+  @media (max-width:1000px){ .tst-grid { columns:2; } }
+  @media (max-width:900px){ .serv, .who-for { grid-template-columns:1fr; } .approach { grid-template-columns:1fr; } .r-photo { max-width:360px; margin:0 auto; order:-1; } .about-grid { grid-template-columns:1fr; gap:28px; } .about-photo { max-width:380px; margin:0 auto; } }
+  @media (max-width:640px){ .tst-grid { columns:1; } }
 </style>
 </head>
 <body>
@@ -53,6 +68,7 @@
       <a href="#sobre">Sobre</a>
       <a href="#atuacao">Atuação</a>
       <a href="#metodo">Como trabalho</a>
+      <a href="#depoimentos">Depoimentos</a>
       <a href="#sinapse">Jogos</a>
     </div>
     <div class="nav-cta">
@@ -81,7 +97,7 @@
     </div>
     <div class="brainstage">
       <div class="halo"></div>
-      <img class="r-photo" src="assets/roberta-logo.jpeg" alt="Marca de Roberta Reis">
+      <img class="r-photo" src="assets/roberta-retrato.jpeg" alt="Roberta Reis, neuropsicopedagoga, de jaleco branco">
     </div>
   </div>
 </header>
@@ -89,16 +105,21 @@
 <!-- SOBRE -->
 <section class="section" id="sobre">
   <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Quem é Roberta</span>
-      <h2>Uma ponte entre o cérebro e o aprender</h2>
-      <p>Sou <b>Roberta Reis</b>, neuropsicopedagoga e psicopedagoga em Juiz de Fora. Ajudo crianças, adolescentes e adultos a superarem barreiras na aprendizagem — entendendo <i>como</i> cada mente processa, memoriza, presta atenção e dá sentido ao mundo.</p>
-    </div>
-    <div class="who-for" style="max-width:760px;margin:0 auto">
-      <div>👧 Crianças com dificuldade na alfabetização</div>
-      <div>📖 Dislexia, TDAH e outros transtornos de aprendizagem</div>
-      <div>🎯 Problemas de atenção e organização nos estudos</div>
-      <div>🏫 Assessoria a escolas e equipes pedagógicas</div>
+    <div class="about-grid">
+      <div class="about-photo">
+        <img src="assets/roberta-cerebro.jpeg" alt="Roberta Reis segurando um modelo de cérebro">
+      </div>
+      <div>
+        <span class="eyebrow">Quem é Roberta</span>
+        <h2 style="margin-top:8px">Uma ponte entre o cérebro e o aprender</h2>
+        <p style="color:var(--ink-soft);margin-top:14px">Sou <b>Roberta Reis</b>, neuropsicopedagoga e psicopedagoga em Juiz de Fora. Ajudo crianças, adolescentes e adultos a superarem barreiras na aprendizagem — entendendo <i>como</i> cada mente processa, memoriza, presta atenção e dá sentido ao mundo.</p>
+        <div class="who-for" style="margin-top:24px">
+          <div>👧 Crianças com dificuldade na alfabetização</div>
+          <div>📖 Dislexia, TDAH e outros transtornos de aprendizagem</div>
+          <div>🎯 Problemas de atenção e organização nos estudos</div>
+          <div>🏫 Assessoria a escolas e equipes pedagógicas</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -143,10 +164,64 @@
         <li><span class="n">4</span><div><b>Intervenção com jogo</b><span>Encontros lúdicos e atividades — inclusive a plataforma de jogos <b>Intensivo da Alfabetização</b> — que treinam o que precisa evoluir.</span></div></li>
       </ul>
     </div>
-    <div class="quote">
-      <p>“Aprender deixa de ser um peso quando a criança descobre que é capaz.”</p>
-      <div style="margin-top:20px;color:#9db6e6;font-weight:800;font-size:.9rem">— Roberta Reis</div>
+    <div>
+      <img src="assets/roberta-livro.jpeg" alt="Roberta Reis estudando com uma xícara de café" style="width:100%;border-radius:24px;box-shadow:var(--sh-lg);border:8px solid #fff;display:block;margin-bottom:22px">
+      <div class="quote">
+        <p>“Aprender deixa de ser um peso quando a criança descobre que é capaz.”</p>
+        <div style="margin-top:20px;color:#9db6e6;font-weight:800;font-size:.9rem">— Roberta Reis</div>
+      </div>
     </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section class="section" id="depoimentos" style="background:linear-gradient(180deg,var(--bg-2),var(--bg))">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Quem já viveu</span>
+      <h2>O que as famílias dizem</h2>
+      <p>Depoimentos de mães e famílias acompanhadas — em suas próprias palavras.</p>
+    </div>
+    <div class="tst-grid">
+
+      <figure class="tst">
+        <span class="mark">“</span>
+        <p>Gostaria de agradecer de coração por todo o carinho, cuidado, dedicação e profissionalismo com que você acompanhou meu filho. Em cada atendimento foi possível perceber o quanto você exerce sua profissão com amor, respeito e sensibilidade. Tenho certeza de que esse trabalho fará diferença na vida dele e também na nossa família. 🙏💗</p>
+        <figcaption class="who"><span class="av">P</span><span><b>Priscila</b><span>Mãe de paciente</span></span></figcaption>
+      </figure>
+
+      <figure class="tst">
+        <span class="mark">“</span>
+        <p>Super indico! Cheguei ao consultório totalmente perdida, sem saber o que estava acontecendo. Hoje minha filha melhorou muito no aprendizado e no comportamento — e eu não me acho mais uma péssima mãe. Você não é apenas uma profissional para nós, mas uma amiga que encontramos. Roberta Reis, eu indico! ❤️🙌</p>
+        <figcaption class="who"><span class="av">C</span><span><b>Carmen</b><span>Mãe de paciente</span></span></figcaption>
+      </figure>
+
+      <figure class="tst">
+        <span class="mark">“</span>
+        <p>E aprende mesmo! Você mudou a vida escolar do meu filho todinha. No começo do ano você me disse que até junho ele já estaria lendo — chegou maio e ele já estava lendo. Profissional competente e amorosa. 😊</p>
+        <figcaption class="who"><span class="av">A</span><span><b>Ana Elisa</b><span>Mãe de aluno</span></span></figcaption>
+      </figure>
+
+      <figure class="tst">
+        <span class="mark">“</span>
+        <p>Excelente profissional — tem nos ajudado muito no crescimento educacional do nosso filho. ❤️🙌</p>
+        <figcaption class="who"><span class="av">E</span><span><b>Família atendida</b><span>Pais de aluno</span></span></figcaption>
+      </figure>
+
+      <figure class="tst">
+        <span class="mark">“</span>
+        <p>Já conseguimos ver um progresso positivo. Muito obrigada pelo carinho e pela atenção de sempre. 🙏</p>
+        <figcaption class="who"><span class="av">P</span><span><b>Patrícia</b><span>Mãe de paciente</span></span></figcaption>
+      </figure>
+
+      <figure class="tst">
+        <span class="mark">“</span>
+        <p>Perfeição que fala! Excelente profissional. ❤️</p>
+        <figcaption class="who"><span class="av">J</span><span><b>Juscinele</b><span>Comentário no Instagram</span></span></figcaption>
+      </figure>
+
+    </div>
+    <p class="tst-note">Depoimentos reais compartilhados por famílias atendidas. Nomes de crianças preservados por privacidade.</p>
   </div>
 </section>
 
