@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roberta Reis · Neuropsicopedagoga Clínica e Institucional — Juiz de Fora</title>
+<meta name="description" content="Roberta Reis — Neuropsicopedagoga e Psicopedagoga em Juiz de Fora/MG. Avaliação e intervenção em dificuldades de aprendizagem, alfabetização e desenvolvimento cognitivo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  /* extras específicos do site institucional */
+  .r-hero { background:
+      radial-gradient(900px 460px at 82% -6%, rgba(43,134,240,.18), transparent 60%),
+      radial-gradient(600px 380px at 6% 20%, rgba(200,151,63,.12), transparent 55%), var(--bg); }
+  .r-photo { border-radius: 28px; overflow: hidden; box-shadow: var(--sh-lg); border: 8px solid #fff; }
+  .r-badges { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+  .r-badge { background:#fff; border:1px solid var(--line); border-radius:999px; padding:8px 16px; font-weight:800; font-size:.85rem; color:var(--ink-soft); box-shadow:var(--sh-sm); display:inline-flex; gap:8px; align-items:center; }
+  .serv { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+  .serv-card { background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; box-shadow:var(--sh-sm); transition:transform .2s, box-shadow .2s; }
+  .serv-card:hover { transform:translateY(-4px); box-shadow:var(--sh-md); }
+  .serv-card .ic { width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:1.7rem; color:#fff; margin-bottom:16px; }
+  .serv-card h3 { font-size:1.3rem; }
+  .serv-card p { color:var(--ink-soft); margin-top:8px; }
+  .approach { display:grid; grid-template-columns:1.1fr .9fr; gap:44px; align-items:center; }
+  .approach ul { list-style:none; padding:0; margin:20px 0 0; display:grid; gap:14px; }
+  .approach li { display:flex; gap:14px; align-items:flex-start; }
+  .approach li .n { flex:none; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#2b86f0,#0f3d80); color:#fff; display:grid; place-items:center; font-family:var(--font-display); font-weight:700; }
+  .approach li b { display:block; }
+  .approach li span { color:var(--ink-soft); font-size:.95rem; }
+  .quote { background:linear-gradient(135deg,#0c2246,#153a72); color:#eaf1fb; border-radius:var(--r-xl); padding:48px; text-align:center; }
+  .quote p { font-family:var(--font-display); font-size:clamp(1.3rem,2.6vw,1.9rem); line-height:1.35; max-width:24ch; margin:0 auto; }
+  .who-for { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .who-for div { background:#fff; border:1px solid var(--line); border-radius:var(--r-md); padding:16px 18px; display:flex; gap:12px; align-items:center; font-weight:700; color:var(--ink); box-shadow:var(--sh-sm); }
+  .cta-band { background:linear-gradient(135deg,#2b86f0,#0f3d80); color:#fff; border-radius:var(--r-xl); padding:52px; text-align:center; box-shadow:var(--sh-lg); }
+  .cta-band h2 { color:#fff; font-size:clamp(1.8rem,3.4vw,2.6rem); }
+  .cta-band p { color:#dbe8ff; max-width:46ch; margin:12px auto 26px; }
+  .cross { background:#fff; border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; display:flex; gap:22px; align-items:center; box-shadow:var(--sh-sm); flex-wrap:wrap; }
+  .cross .em { font-size:2.6rem; }
+  @media (max-width:900px){ .serv, .who-for { grid-template-columns:1fr; } .approach { grid-template-columns:1fr; } .r-photo { max-width:360px; margin:0 auto; order:-1; } }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="#">
+      <span class="brand-mark"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="7" r="2.4" fill="#8fc0ff"/><circle cx="18" cy="6" r="2.1" fill="#e6c98a"/><circle cx="17" cy="17" r="2.4" fill="#fff"/><circle cx="7" cy="17" r="2" fill="#8fc0ff"/><path d="M6 7 L18 6 M18 6 L17 17 M17 17 L7 17 M7 17 L6 7 M6 7 L17 17" stroke="#cfe2ff" stroke-width="1.1" opacity=".7"/></svg></span>
+      <span><div class="brand-name">Roberta <b>Reis</b></div><div class="brand-sub">Neuropsicopedagoga</div></span>
+    </a>
+    <div class="nav-links">
+      <a href="#sobre">Sobre</a>
+      <a href="#atuacao">Atuação</a>
+      <a href="#metodo">Como trabalho</a>
+      <a href="#sinapse">Jogos</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="https://wa.me/" target="_blank" rel="noopener">Agendar avaliação</a>
+    </div>
+    <button class="nav-burger" onclick="document.getElementById('contato').scrollIntoView({behavior:'smooth'})">☰</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero r-hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Neuropsicopedagogia clínica e institucional · Juiz de Fora/MG</span>
+      <h1>Cada criança aprende de um <span class="glow">jeito</span>. Meu trabalho é encontrar o dela.</h1>
+      <p class="lead">Avaliação e intervenção em dificuldades de aprendizagem, alfabetização e desenvolvimento cognitivo — com escuta, base científica e um olhar para o ser humano inteiro.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#contato">Agendar avaliação →</a>
+        <a class="btn btn-ghost" href="#atuacao">Conhecer o trabalho</a>
+      </div>
+      <div class="r-badges">
+        <span class="r-badge">🎓 Neuropsicopedagoga</span>
+        <span class="r-badge">🧩 Psicopedagoga</span>
+        <span class="r-badge">📚 Especialista em alfabetização</span>
+      </div>
+    </div>
+    <div class="brainstage">
+      <div class="halo"></div>
+      <img class="r-photo" src="assets/roberta-logo.jpeg" alt="Marca de Roberta Reis">
+    </div>
+  </div>
+</header>
+
+<!-- SOBRE -->
+<section class="section" id="sobre">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Quem é Roberta</span>
+      <h2>Uma ponte entre o cérebro e o aprender</h2>
+      <p>Sou <b>Roberta Reis</b>, neuropsicopedagoga e psicopedagoga em Juiz de Fora. Ajudo crianças, adolescentes e adultos a superarem barreiras na aprendizagem — entendendo <i>como</i> cada mente processa, memoriza, presta atenção e dá sentido ao mundo.</p>
+    </div>
+    <div class="who-for" style="max-width:760px;margin:0 auto">
+      <div>👧 Crianças com dificuldade na alfabetização</div>
+      <div>📖 Dislexia, TDAH e outros transtornos de aprendizagem</div>
+      <div>🎯 Problemas de atenção e organização nos estudos</div>
+      <div>🏫 Assessoria a escolas e equipes pedagógicas</div>
+    </div>
+  </div>
+</section>
+
+<!-- ATUAÇÃO -->
+<section class="section" id="atuacao" style="background:linear-gradient(180deg,var(--bg-2),var(--bg))">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Atuação</span>
+      <h2>Como posso ajudar</h2>
+    </div>
+    <div class="serv">
+      <div class="serv-card">
+        <div class="ic" style="background:var(--p-executiva)">🔎</div>
+        <h3>Avaliação neuropsicopedagógica</h3>
+        <p>Investigação das funções cognitivas — atenção, memória, linguagem, funções executivas — para entender a raiz da dificuldade e traçar um plano.</p>
+      </div>
+      <div class="serv-card">
+        <div class="ic" style="background:var(--p-linguagem)">✏️</div>
+        <h3>Intervenção & alfabetização</h3>
+        <p>Atendimento individualizado com base na consciência fonológica e no ritmo de cada um — o método do <b>Intensivo da Alfabetização</b>.</p>
+      </div>
+      <div class="serv-card">
+        <div class="ic" style="background:var(--p-atencao)">🏫</div>
+        <h3>Assessoria institucional</h3>
+        <p>Orientação a escolas, professores e famílias para criar ambientes de aprendizagem que respeitam a neurodiversidade.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MÉTODO -->
+<section class="section" id="metodo">
+  <div class="wrap approach">
+    <div>
+      <span class="eyebrow">Como trabalho</span>
+      <h2 style="font-size:clamp(1.8rem,3.2vw,2.4rem);margin-top:8px">Um caminho claro, do primeiro encontro ao progresso</h2>
+      <ul>
+        <li><span class="n">1</span><div><b>Acolhimento e escuta</b><span>Conversa com a família para entender a história, as queixas e o contexto.</span></div></li>
+        <li><span class="n">2</span><div><b>Avaliação</b><span>Sessões estruturadas para mapear como o cérebro aprende — pontos fortes e desafios.</span></div></li>
+        <li><span class="n">3</span><div><b>Plano individual</b><span>Devolutiva com um plano de intervenção realista, feito para aquela pessoa.</span></div></li>
+        <li><span class="n">4</span><div><b>Intervenção com jogo</b><span>Encontros lúdicos e atividades — inclusive a plataforma de jogos <b>Intensivo da Alfabetização</b> — que treinam o que precisa evoluir.</span></div></li>
+      </ul>
+    </div>
+    <div class="quote">
+      <p>“Aprender deixa de ser um peso quando a criança descobre que é capaz.”</p>
+      <div style="margin-top:20px;color:#9db6e6;font-weight:800;font-size:.9rem">— Roberta Reis</div>
+    </div>
+  </div>
+</section>
+
+<!-- SINAPSE cross-sell -->
+<section class="section" id="sinapse" style="background:linear-gradient(180deg,var(--bg),var(--bg-2))">
+  <div class="wrap">
+    <div class="cross">
+      <div class="em">🧠</div>
+      <div style="flex:1;min-width:240px">
+        <h3 style="font-size:1.4rem">Conheça o <b style="color:var(--blue)">Intensivo da Alfabetização</b> — minha plataforma de jogos</h3>
+        <p style="color:var(--ink-soft);margin-top:6px">Jogos que treinam atenção, memória, linguagem e matemática, por faixa etária. Para famílias treinarem em casa e para uso no consultório.</p>
+      </div>
+      <a class="btn btn-primary" href="index.html">Ver a plataforma →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATO -->
+<section class="section" id="contato">
+  <div class="wrap">
+    <div class="cta-band">
+      <h2>Vamos conversar sobre seu filho?</h2>
+      <p>O primeiro passo é uma conversa. Agende uma avaliação e descubra como tornar o aprender mais leve.</p>
+      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn-gold" href="https://wa.me/" target="_blank" rel="noopener">💬 Chamar no WhatsApp</a>
+        <a class="btn btn-ghost" style="background:#ffffff22;color:#fff;border-color:#ffffff44" href="https://www.instagram.com/intensivo_da_alfabetizacao/" target="_blank" rel="noopener">📷 @intensivo_da_alfabetizacao</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-brand">
+      <div class="brand-name" style="color:#fff">Roberta <b style="color:#8fc0ff">Reis</b></div>
+      <p style="margin-top:12px">Neuropsicopedagoga Clínica e Institucional · Psicopedagoga · Juiz de Fora / MG.</p>
+    </div>
+    <div>
+      <h4>Navegação</h4>
+      <a href="#sobre">Sobre</a><a href="#atuacao">Atuação</a><a href="#metodo">Como trabalho</a><a href="index.html">Plataforma de jogos</a>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <a href="https://www.instagram.com/intensivo_da_alfabetizacao/" target="_blank" rel="noopener">📷 @intensivo_da_alfabetizacao</a>
+      <a href="https://wa.me/" target="_blank" rel="noopener">💬 WhatsApp</a>
+    </div>
+  </div>
+  <div class="footer-bottom wrap">Protótipo de demonstração · © 2026 Roberta Reis</div>
+</footer>
+
+</body>
+</html>
