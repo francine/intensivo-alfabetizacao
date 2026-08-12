@@ -11,13 +11,14 @@
     el(tag, props = {}, kids = []) {
       const n = document.createElement(tag);
       for (const k in props) {
+        if (props[k] == null || props[k] === false) continue;
         if (k === "class") n.className = props[k];
         else if (k === "html") n.innerHTML = props[k];
         else if (k === "text") n.textContent = props[k];
         else if (k.startsWith("on") && typeof props[k] === "function")
           n.addEventListener(k.slice(2).toLowerCase(), props[k]);
         else if (k === "style" && typeof props[k] === "object") Object.assign(n.style, props[k]);
-        else n.setAttribute(k, props[k]);
+        else n.setAttribute(k, props[k] === true ? "" : props[k]);
       }
       (Array.isArray(kids) ? kids : [kids]).forEach((c) => {
         if (c == null) return;
@@ -74,14 +75,19 @@
   const PKEY = "sinapse_progress";
   function loadProgress() { try { return JSON.parse(localStorage.getItem(PKEY)) || {}; } catch (e) { return {}; } }
   function saveProgress(p) { try { localStorage.setItem(PKEY, JSON.stringify(p)); } catch (e) {} }
-  function gameStars(id) { return loadProgress()[id] || {}; } // { phaseIndex: stars }
-  function bestStars(id, idx) { return gameStars(id)[idx] || 0; }
-  function recordStars(id, idx, stars) {
+  function progressKey(id, age) { return age ? `${id}:${age}` : id; }
+  function gameStars(id, age) {
+    const progress = loadProgress();
+    return progress[progressKey(id, age)] || progress[id] || {};
+  } // { phaseIndex: stars }; o id antigo serve de fallback de migração
+  function bestStars(id, idx, age) { return gameStars(id, age)[idx] || 0; }
+  function recordStars(id, idx, stars, age) {
     const p = loadProgress();
-    p[id] = p[id] || {};
-    if (stars > (p[id][idx] || 0)) { p[id][idx] = stars; saveProgress(p); }
+    const key = progressKey(id, age);
+    p[key] = p[key] || {};
+    if (stars > (p[key][idx] || 0)) { p[key][idx] = stars; saveProgress(p); }
   }
-  function phaseUnlocked(id, idx) { return idx === 0 || bestStars(id, idx - 1) >= 1; }
+  function phaseUnlocked(id, idx, age) { return idx === 0 || bestStars(id, idx - 1, age) >= 1; }
   SINAPSE.progress = { load: loadProgress, best: bestStars };
 
   function starsFromPct(pct) { return pct >= 0.85 ? 3 : pct >= 0.6 ? 2 : pct >= 0.3 ? 1 : 0; }
@@ -202,10 +208,10 @@
         // ---- modo mapa de fases ----
         const idx = api.phaseIndex;
         const stars = Math.max(0, Math.min(3, res.stars != null ? res.stars : starsFromPct(pct)));
-        const prevBest = bestStars(def.id, idx);
+        const prevBest = bestStars(def.id, idx, age);
         const nextExists = !!def.phases[idx + 1];
         const willUnlockNext = stars >= 1 && nextExists && prevBest < 1;
-        if (stars >= 1) recordStars(def.id, idx, stars);
+        if (stars >= 1) recordStars(def.id, idx, stars, age);
 
         let title = "Quase lá!";
         if (stars >= 3) title = "Perfeito! 🏆";
@@ -262,8 +268,8 @@
 
       const trail = H.el("div", { class: "phase-trail" });
       def.phases.forEach((ph, i) => {
-        const unlocked = phaseUnlocked(def.id, i);
-        const stars = bestStars(def.id, i);
+        const unlocked = phaseUnlocked(def.id, i, age);
+        const stars = bestStars(def.id, i, age);
         const dot = H.el("button", {
           class: "phase-dot", disabled: unlocked ? null : "disabled",
           "aria-label": unlocked ? `Fase ${i + 1}: ${ph.nome}` : `Fase ${i + 1} bloqueada — conclua a anterior`,
