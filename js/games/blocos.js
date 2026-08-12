@@ -36,7 +36,7 @@
         "➕ No Iniciante, some. No Avançado e no Expert, escolha soma ou subtração.",
         "✅ Confira a conta. Você pode tentar outra combinação quando precisar.",
       ],
-      dica: "Se saiu 7, experimente 1 + 6, 5 + 2, 8 − 1 ou 9 − 2.",
+      dica: "Um número pode ser usado duas vezes: para chegar a 8, 4 + 4 também vale.",
     },
 
     phases: [
@@ -122,7 +122,7 @@
           b = h.rand(1, Math.max(1, cfg.maxNumber - nextTarget)); a = nextTarget + b;
         }
 
-        const values = [a, b];
+        const values = [...new Set([a, b])];
         while (values.length < cfg.boardSize) {
           const value = h.rand(1, cfg.maxNumber);
           if (value !== nextTarget && !values.includes(value)) values.push(value);
@@ -182,17 +182,11 @@
 
         function chooseTile(tile, button) {
           if (locked || checking) return;
-          const found = selected.findIndex((item) => item.id === tile.id);
-          if (found >= 0) {
-            selected.splice(found, 1); button.classList.remove("selected"); button.setAttribute("aria-pressed", "false");
-          } else {
-            if (selected.length === 2) {
-              const removed = selected.shift();
-              const old = tileButtons.find((item) => item.tile.id === removed.id);
-              if (old) { old.button.classList.remove("selected"); old.button.setAttribute("aria-pressed", "false"); }
-            }
-            selected.push(tile); button.classList.add("selected"); button.setAttribute("aria-pressed", "true"); sfx.click();
+          if (selected.length === 2) {
+            selected = [];
+            tileButtons.forEach((item) => { item.button.classList.remove("selected"); item.button.setAttribute("aria-pressed", "false"); });
           }
+          selected.push(tile); button.classList.add("selected"); button.setAttribute("aria-pressed", "true"); sfx.click();
           verify.disabled = selected.length !== 2;
           swap.disabled = selected.length !== 2 || cfg.operations.length === 1;
           feedback.textContent = ""; feedback.className = "g-feedback";
@@ -253,7 +247,7 @@
           ? `Escolha dois números abaixo que, somados, dão ${target}`
           : `Escolha dois números e a operação que dá ${target}`;
         const controls = cfg.operations.length === 1
-          ? [h.el("div", { class: "blocks-auto-hint", text: "✨ Toque em dois números coloridos — a conta é conferida automaticamente." })]
+          ? [h.el("div", { class: "blocks-auto-hint", text: "✨ Você pode tocar duas vezes no mesmo número. A conta é conferida automaticamente." })]
           : [swap, verify];
 
         stage.innerHTML = "";
