@@ -33,7 +33,7 @@
       como: [
         "🎲 Role o dado para descobrir o número-alvo.",
         "🧱 Escolha dois blocos numerados do tabuleiro.",
-        "➕ Use soma ou subtração para montar o número que saiu.",
+        "➕ No Iniciante, some. No Avançado e no Expert, escolha soma ou subtração.",
         "✅ Confira a conta. Você pode tentar outra combinação quando precisar.",
       ],
       dica: "Se saiu 7, experimente 1 + 6, 5 + 2, 8 − 1 ou 9 − 2.",
@@ -50,9 +50,13 @@
       const cfg = LEVELS[api.age][level];
       let round = 0, correct = 0, points = 0, attempts = 0;
       let target = 0, solution = null, selected = [], operation = "+";
-      let timer = null, timeLeft = 0, locked = false;
+      let timer = null, timeLeft = 0, locked = false, checking = false;
 
-      showRoll();
+      api.intro("🎲", "Desafio dos Blocos",
+        level === 0
+          ? "Role o dado e toque em dois blocos que, somados, formam o número sorteado. Eu confiro a conta para você!"
+          : "Role o dado, escolha dois blocos e use soma ou subtração para formar o número sorteado.",
+        showRoll);
 
       function alive() { return document.body.contains(stage); }
       function stopTimer() { if (timer) clearInterval(timer); timer = null; }
@@ -66,7 +70,7 @@
       function showRoll() {
         stopTimer();
         if (!alive()) return;
-        target = 0; selected = []; attempts = 0; locked = false;
+        target = 0; selected = []; attempts = 0; locked = false; checking = false;
         if (round >= cfg.rounds) return finish();
         setStats();
 
@@ -89,6 +93,7 @@
 
         stage.innerHTML = "";
         stage.appendChild(h.el("div", { class: "g-panel blocks-panel" }, [
+          steps(1),
           h.el("div", { class: "g-prompt", text: `${api.phase.nome} · descubra o número-alvo` }),
           die,
           h.el("p", { class: "blocks-lead", text: "Quando o número aparecer, monte uma conta usando dois blocos." }),
@@ -120,23 +125,23 @@
         const values = [a, b];
         while (values.length < cfg.boardSize) {
           const value = h.rand(1, cfg.maxNumber);
-          if (value !== nextTarget) values.push(value);
+          if (value !== nextTarget && !values.includes(value)) values.push(value);
         }
         const tiles = h.shuffle(values.map((value, index) => ({ id: `${round}-${index}-${value}`, value })));
         return { target: nextTarget, solution: `${a} ${chosenOp} ${b} = ${nextTarget}`, tiles };
       }
 
       function renderBoard(tiles) {
-        operation = "+"; selected = []; attempts = 0; locked = false;
+        operation = "+"; selected = []; attempts = 0; locked = false; checking = false;
         const die = h.el("div", { class: "blocks-die revealed", text: String(target), "aria-label": `número sorteado: ${target}` });
-        const expression = h.el("div", { class: "blocks-expression", text: "Escolha o primeiro bloco" });
+        const expression = h.el("div", { class: "blocks-expression", "aria-live": "polite" });
         const feedback = h.el("div", { class: "g-feedback", "aria-live": "polite" });
         const board = h.el("div", { class: "blocks-board", role: "group", "aria-label": "blocos numerados" });
         const tileButtons = [];
 
-        tiles.forEach((tile, index) => {
+        tiles.forEach((tile) => {
           const button = h.el("button", {
-            class: `blocks-tile color-${index % 6}`,
+            class: `blocks-tile color-${(tile.value - 1) % 6}`,
             text: String(tile.value),
             "aria-label": `bloco ${tile.value}`,
             "aria-pressed": "false",
@@ -176,7 +181,7 @@
         });
 
         function chooseTile(tile, button) {
-          if (locked) return;
+          if (locked || checking) return;
           const found = selected.findIndex((item) => item.id === tile.id);
           if (found >= 0) {
             selected.splice(found, 1); button.classList.remove("selected"); button.setAttribute("aria-pressed", "false");
@@ -192,12 +197,19 @@
           swap.disabled = selected.length !== 2 || cfg.operations.length === 1;
           feedback.textContent = ""; feedback.className = "g-feedback";
           updateExpression();
+          if (cfg.operations.length === 1 && selected.length === 2) {
+            checking = true;
+            setTimeout(check, 280);
+          }
         }
 
         function updateExpression() {
-          if (!selected.length) expression.textContent = "Escolha o primeiro bloco";
-          else if (selected.length === 1) expression.textContent = `${selected[0].value} ${operation} … = ${target}`;
-          else expression.textContent = `${selected[0].value} ${operation} ${selected[1].value} = ${target}?`;
+          expression.innerHTML = "";
+          expression.appendChild(slot(selected[0] ? selected[0].value : "?", !!selected[0]));
+          expression.appendChild(h.el("span", { class: "blocks-symbol", text: operation }));
+          expression.appendChild(slot(selected[1] ? selected[1].value : "?", !!selected[1]));
+          expression.appendChild(h.el("span", { class: "blocks-symbol", text: "=" }));
+          expression.appendChild(slot(target, true, "target"));
         }
 
         function check() {
@@ -214,20 +226,53 @@
             verify.disabled = true; swap.disabled = true; setStats(); round++;
             setTimeout(showRoll, 1050);
           } else {
-            sfx.bad(); feedback.textContent = `${selected[0].value} ${operation} ${selected[1].value} dá ${result}. Tente outra combinação.`;
+            sfx.bad(); feedback.textContent = `${selected[0].value} ${operation} ${selected[1].value} dá ${result}. Tente outros blocos.`;
             feedback.className = "g-feedback no";
             expression.classList.remove("g-wrong"); void expression.offsetWidth; expression.classList.add("g-wrong");
+            if (cfg.operations.length === 1) {
+              setTimeout(() => {
+                if (!alive() || locked) return;
+                selected = []; checking = false;
+                tileButtons.forEach((item) => { item.button.classList.remove("selected"); item.button.setAttribute("aria-pressed", "false"); });
+                feedback.textContent = "Escolha outros dois blocos."; feedback.className = "g-feedback";
+                updateExpression();
+              }, 900);
+            } else checking = false;
           }
         }
 
+        function slot(value, filled, extra) {
+          return h.el("span", { class: `blocks-slot${filled ? " filled" : ""}${extra ? " " + extra : ""}`, text: String(value) });
+        }
+
+        updateExpression();
+        const task = cfg.operations.length === 1
+          ? `Toque em dois blocos que, somados, dão ${target}`
+          : `Escolha dois blocos e a operação que dá ${target}`;
+        const controls = cfg.operations.length === 1
+          ? [h.el("div", { class: "blocks-auto-hint", text: "✨ Toque em dois blocos — a conta é conferida automaticamente." })]
+          : [swap, verify];
+
         stage.innerHTML = "";
         stage.appendChild(h.el("div", { class: "g-panel blocks-panel" }, [
-          h.el("div", { class: "g-prompt", text: "Monte o número que saiu" }), die,
-          h.el("div", { class: "blocks-workspace" }, [board, h.el("div", { class: "blocks-equation" }, [expression, operations])]),
+          steps(2),
+          h.el("div", { class: "g-prompt blocks-task", text: task }), die,
+          expression,
+          h.el("div", { class: "blocks-board-label", text: "Escolha aqui:" }),
+          board,
+          cfg.operations.length > 1 ? h.el("div", { class: "blocks-equation" }, [h.el("div", { class: "blocks-board-label", text: "Escolha a operação:" }), operations]) : null,
           feedback,
-          h.el("div", { class: "g-toolbar" }, [swap, verify]),
+          h.el("div", { class: "g-toolbar" }, controls),
         ]));
         setStats();
+      }
+
+      function steps(active) {
+        return h.el("div", { class: "blocks-steps", "aria-label": "etapas do jogo" }, [
+          h.el("span", { class: active === 1 ? "active" : "done", text: "1 · Role o dado" }),
+          h.el("span", { class: active === 2 ? "active" : "", text: "2 · Escolha os blocos" }),
+          h.el("span", { text: "3 · Veja a conta" }),
+        ]);
       }
 
       function startTimer() {
